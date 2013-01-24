@@ -1,0 +1,130 @@
+ \documentclass[a4paper,10pt]{article}
+\input{/Users/WannaGetHigh/workspace/latex/macros.tex}
+
+\title{TD 1: CAR Programmation client/serveur en mode message}
+\author{François \bsc{Lepan}}
+
+\begin{document}
+\maketitle
+
+\section{Définitions}
+
+??
+
+\section{Serveur calculette}
+
+\subsection{protocole applicatif}
+
+\begin{Verbatim}
+Client: HELO CALCAR
+Serveur: HELO CALCAR
+Client: 3 + 4
+Serveur:  7
+Client: 21.0 * 2.3
+Serveur: 48.3
+Client: BYE
+Serveur:
+\end{Verbatim}
+
+\begin{tabular}{|c|c|c|}
+\hline
+Type & Client & Serveur \\
+\hline
+HELO CALC & x & x \\
+\hline
+Calcule(opopop) & x & \\
+\hline
+Resultat & & x \\
+\hline
+Bye & x & \\
+\hline
+\end{tabular}
+
+\subsection{les cas d’erreur}
+
+\begin{tabular}{|c|c|}
+\hline
+Cas d'erreur & Type  \\
+\hline
+ a +b | ,5 * 3 | 8 \$ 5 | +80 | 34 + & FORMAT INVALIDE \\
+\hline
+21 / 0 &  DIVISION PAR ZERO \\
+\hline
+1000...0000*900...0000 & DEPASSEMENT DE CAPACITE \\
+\hline
+HELO CAL & PROTOCOLE INCONNU \\
+\hline
+\end{tabular}
+
+\newpage
+
+\subsection{pseudo-code du serveur et le pseu- do-code d’un client}
+
+\begin{paragraph} {Serveur}
+\begin{Verbatim}
+while(true) {
+	attendreCx()
+	try {
+		isPortValide()
+		while (data = recevoir() != "bye") { // risque de DOS
+			dataValide(data)
+			reponse = calcule(data)
+			envoyer(data)
+		}
+	} catch ( ...) {
+	} catch ( ...) {
+	} finally {
+		fermerCx()
+	}
+}
+\end{Verbatim}
+\end{paragraph}
+
+\begin{paragraph} {Client}
+\begin{Verbatim}
+ouvrirCx(serveur)
+envoyer("HELO CALCAR")
+recevoir()
+envoyer("8.6*1.75")
+res = recevoir()  // petit risque d'attente infini
+print(res)
+envoyer(bye)
+fermerCx()
+\end{Verbatim}
+\end{paragraph}
+
+\subsection{Le serveur est-il avec ou sans état ?}
+le serveur est sans état car il n'y a pas de stockage de donne du client
+
+\subsection{Le protocole est-il avec ou sans état ?}
+il y a ordre dans les message donc état !
+
+\newpage
+
+\subsection{}
+\begin{Verbatim}
+while(true) {
+	attendreCx()
+	new Thread() {
+		try {
+			isPortValide()
+			while (data = recevoir() != "bye") { // risque de DOS
+				dataValide(data)
+				reponse = calcule(data)
+				envoyer(data)
+			}
+		} catch ( ...) {
+		} catch ( ...) {
+		} finally {
+			fermerCx()
+		}
+	}.run()
+}
+\end{Verbatim}
+
+\subsection{}
+il faut un timeout 
+
+\end{document}
+
+
