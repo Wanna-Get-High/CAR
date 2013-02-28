@@ -15,6 +15,11 @@ import java.net.SocketException;
  */
 public class FTPServerThread extends Thread {
 	
+	private String name  = "plop";
+	
+	private String password = "plop";
+	
+	
 	/** The buffer on which the client will ask the server */
 	private BufferedReader clientMessage;
 	
@@ -47,11 +52,10 @@ public class FTPServerThread extends Thread {
 			this.clientMessage = new BufferedReader (new InputStreamReader (socket.getInputStream()));
 			this.serverMessage = new BufferedWriter (new OutputStreamWriter (socket.getOutputStream()));
 			
-			this.writeMessageFromServer("220 hello who are you ?");
+			this.writeMessageFromServer("220 login required\n");
 			
 			while (isClientRequesting) {
 				this.processRequest(this.clientMessage.readLine());
-				
 			}
 			
 			this.closeConnection();
@@ -70,6 +74,13 @@ public class FTPServerThread extends Thread {
 	 * @param s the request of the client
 	 */
 	private void processRequest(String s) throws IOException, SocketException {
+		
+		if (s == null || s.isEmpty()) {
+			// if connection fail
+			this.processERROR("");
+			System.exit(0);
+		}
+		
 		String[] cmd = s.split(" ");
 		
 		if  (cmd[0].equals("USER")) 	 	{ processUSER(cmd); } 
@@ -78,7 +89,7 @@ public class FTPServerThread extends Thread {
 		else if  (cmd[0].equals("STOR")) 	{ processSTOR(cmd); } 
 		else if  (cmd[0].equals("LIST")) 	{ processLIST(cmd); } 
 		else if  (cmd[0].equals("QUIT")) 	{ processQUIT(cmd); } 
-		else 								{ processERROR(cmd); }
+		else 								{ processERROR(cmd[0]); }
 	}
 	
 	/**
@@ -89,7 +100,13 @@ public class FTPServerThread extends Thread {
 	private void processUSER (String[] s) throws IOException {
 		System.out.println(this.printRequest(s));
 		
+		if (s[1].equals(this.name)) {
+			this.writeMessageFromServer("331 password required\n");
+		} else {
+			this.writeMessageFromServer("430  the username: "+s[1]+" does not exist\n");
+		}
 	}
+	
 	
 	/**
 	 * Process the PASS request.
@@ -97,8 +114,17 @@ public class FTPServerThread extends Thread {
 	 * @param s the request of the client
 	 */
 	private void processPASS (String[] s) throws IOException {
-		System.out.println("processPASS: "+this.printRequest(s));
+		System.out.println(this.printRequest(s));
+		
+		if (s[1].equals(this.password)) {
+			this.writeMessageFromServer("230  hello "+this.name +"\n");
+			//this.writeMessageFromServer("150 plop \n");
+			
+		} else {
+			this.writeMessageFromServer("430  the password is not correct\n");
+		}
 	}
+	
 	
 	/**
 	 * Process the RETR request.
@@ -106,7 +132,9 @@ public class FTPServerThread extends Thread {
 	 * @param s the request of the client
 	 */
 	private void processRETR (String[] s) throws IOException {
-		System.out.println("processRETR: "+this.printRequest(s));
+		System.out.println(this.printRequest(s));
+		
+		
 	}
 	
 	/**
@@ -115,7 +143,7 @@ public class FTPServerThread extends Thread {
 	 * @param s the request of the client
 	 */
 	private void processSTOR (String[] s) throws IOException {
-		System.out.println("processSTOR: "+this.printRequest(s));
+		System.out.println(this.printRequest(s));
 	}
 	
 	/**
@@ -124,7 +152,7 @@ public class FTPServerThread extends Thread {
 	 * @param s the request of the client
 	 */
 	private void processLIST (String[] s) throws IOException {
-		System.out.println("processLIST: "+this.printRequest(s));
+		System.out.println(this.printRequest(s));
 	}
 	
 	/**
@@ -133,6 +161,7 @@ public class FTPServerThread extends Thread {
 	 * @param s the request of the client
 	 */
 	private void processQUIT (String[] s) throws IOException {
+		this.isClientRequesting = false;
 		System.out.println("processQUIT: "+this.printRequest(s));
 	}
 	
@@ -141,15 +170,15 @@ public class FTPServerThread extends Thread {
 	 * 
 	 * @param s the request of the client
 	 */
-	private void processERROR (String [] s) throws IOException {
-		this.writeMessageFromServer("502 command not implemented");
+	private void processERROR (String s) throws IOException {
+		this.writeMessageFromServer("502 command not implemented: "+s);
 	}
 	
 	/**
 	 * Close the connection of the socket
 	 */
 	private void closeConnection() throws IOException, SocketException {
-			this.writeMessageFromServer("BYE BYE");
+			this.writeMessageFromServer("BYE BYE\n");
 			this.isClientRequesting = false;
 			this.socket.close();
 	}
@@ -173,4 +202,11 @@ public class FTPServerThread extends Thread {
 		
 		return s;
 	}
+//	
+//	private void print(char[] buffer){
+//		for (int i = 0; i < buffer.length; i++) {
+//			System.out.print(buffer[i]);
+//		}
+//		System.out.println();
+//	}
 }
