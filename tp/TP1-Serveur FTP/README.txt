@@ -1,5 +1,5 @@
 
-									FTP Server in SmallTalk
+				FTP Server in SmallTalk
 
 Benjamin Van Ryseghem
 Francois Lepan
