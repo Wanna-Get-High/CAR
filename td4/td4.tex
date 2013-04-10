@@ -1,0 +1,105 @@
+\documentclass[a4paper,10pt]{article}
+\input{/Users/benjamin/Documents/Education/LaTeX/macro.tex}
+
+\title{CAR - Séance 4 : Représentation des données}
+\author{Benjamin \bsc{Van Ryseghem}}
+
+\begin{document}
+\maketitle
+
+\section{Petit boutiste et grand boutiste}
+\subsection{Question 1}
+\verb?"Hello World"?
+
+\paragraph{Différents codages:}
+
+\mbox{}
+
+\begin{tabular} { ll}
+Machine A (big endian) : & 000B 48 65 6C 6C 6F 20 57 6F 72 6C 64 \\
+Machine B (little endian) : & OB00 65 48 6C 6C 20 6F 6F 57 6C 72 64 \\
+\end{tabular}
+
+\subsection{Question 2}
+
+Du caca !
+
+\subsection{Question 3}
+
+OB 00 65 48 6C 6C 20 6F 6F 57 6C 72 64
+
+\paragraph{Conclusion:}
+Il faut se mettre d'accord sur le format à utiliser (bas niveau)
+
+\section{Mécanisme d’encodage des données en Java}
+
+\subsection{Question 1}
+\verb?AC ED 00 05 77 08 00 00 00 11 00 00 00 02?
+
+\mbox{}
+
+\begin{tabular}{|c|c|}
+\hline
+0xACED & Magic stream \\
+0x0005 & Stream version \\
+0x77 & Block Data \\
+0x00000011 & 17 \\
+0x00000002 & 2 \\
+\hline
+\end{tabular}
+
+\subsection{Question 2}
+\verb?AC ED 00 05 77 07 00 05 48 65 6C 6C 6F?
+
+\mbox{}
+
+\begin{tabular}{|c|c|}
+\hline
+0xACED & Magic stream \\
+0x0005 & Stream version \\
+0x77 & Block Data \\
+0x07 & taille totale de la stream (7 octets) \\
+0x0005 & taille de la string (5 caractères) \\
+0x48 & \$h \\
+0x65 & \$e \\
+0x6C & \$l \\
+0x6C & \$l \\
+0x6F & \$o \\
+\hline
+\end{tabular}
+
+\subsection{Question 3}
+
+\begin{tabular}{|c || c|}
+\hline
+Avantages & Inconvénients\\
+\hline
+\hline
+foo & bar\\
+\hline
+\end{tabular}
+
+\subsection{Question 4}
+\begin{verbatimtab}
+class Point2D implements Serializable { 
+	private long x;	private long y; 
+}
+\end{verbatimtab}
+
+%\begin{tabular}{|c|c|c|c|}
+%\hline
+%0xACED & \multicolumn{3}{|c|}{Magic Stream} \\
+%0x0005 & \multicolumn{3}{|c|}{Stream version}\\
+%TC\_CLASS & \multicolumn{3}{|c|}{}\\
+%\hline
+%\multirow{3}{2cm}{classDesc} &newClassDesc&& \\
+%&nullReference & &\\
+%&(ClassDesc)prevObject & &\\
+%\hline
+%handle & \multicolumn{3}{|c|}{0}\\
+%\end{tabular}
+\cf Francois
+
+\signature
+
+\end{document}
