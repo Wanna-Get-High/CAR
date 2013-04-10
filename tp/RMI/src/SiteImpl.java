@@ -33,16 +33,37 @@ public class SiteImpl extends UnicastRemoteObject implements SiteItf {
 	
 	protected void loop() throws RemoteException{
 		while(true){
-			String username;
+			String message;
 			Console console = System.console();
-	        username = console.readLine("Please enter user name : ");   
-	        this.sendMessage("You entered : " + username);
+	        message = console.readLine("Please enter user name : ");
+	        if("exit".equals(message)){
+	        	exit();
+	        }
+	        this.sendMessage(message);
 		}
+	}
+
+	private void exit() throws RemoteException {
+		for(SiteItf son : this.children){
+			son.setFather(this.father);
+		}
+		this.father.removeSon(this);
+		try {
+			Naming.unbind(this.id);
+		} 
+		catch(NotBoundException ex){
+			System.out.println("This id is not in the registry table");
+			System.exit(1);
+		}
+		catch(MalformedURLException ex){
+			System.out.println("The URL provided as id is not a valid URL");
+			System.exit(1);
+		}
+		System.exit(0);
 	}
 	
 	protected void register(String id, String father) throws RemoteException {
 		System.setSecurityManager(null);
-		
 		try{
 			Naming.rebind(id, this);
 		}
@@ -50,12 +71,10 @@ public class SiteImpl extends UnicastRemoteObject implements SiteItf {
 			System.out.println("The URL provided as id is not a valid URL");
 			System.exit(1);
 		}
-		
 		if (father == null){
 			this.father = null;
 			return;
 		}
-		
 		try{
 			this.father = (SiteItf)( Naming.lookup(father));
 			this.father.addSon(this);
@@ -114,5 +133,15 @@ public class SiteImpl extends UnicastRemoteObject implements SiteItf {
 				e.printStackTrace();
 			}
 		
+	}
+
+	@Override
+	public void setFather(SiteItf father) throws RemoteException {
+		this.father = father;
+	}
+
+	@Override
+	public void removeSon(SiteItf son) throws RemoteException {
+		this.children.remove(son);
 	}
 }
