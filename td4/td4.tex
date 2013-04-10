@@ -4,10 +4,12 @@
 \title{CAR - Séance 4 : Représentation des données}
 \author{Benjamin \bsc{Van Ryseghem}}
 
+
 \begin{document}
 \maketitle
 
 \section{Petit boutiste et grand boutiste}
+
 \subsection{Question 1}
 \verb?"Hello World"?
 
@@ -80,26 +82,86 @@ foo & bar\\
 \end{tabular}
 
 \subsection{Question 4}
+
+
+\subsection{"hello world" }
+
+Big indian: 000B 6865 6C6C 6F20 776F 726C 64
+
+Little indian: 0B00 6865 6C6C 6F20 776F 726C 64
+
+\subsection{Que se passe-t-il si la machine A envoie la chaîne de caractères telle quelle à la machine B ?}
+
+Il ne vont pas se comprendre ... PB pour la taille.
+
+\subsection{Dans un deuxième temps, on décide d’inverser l’ordre des octets pour chaque couple d’octets arrivant sur B. Que se passe-t-il ?}
+
+0B00 6568 6C6C 206F 776F 6C72 0064
+
+message = "ehllowlrd"
+
+\section{Mécanisme d’encodage des données en Java}
+
+\subsection{Décoder la séquence d’octets suivante sachant que 2 entiers (int) ont été écrits dans le flux. Quelle est la valeur de ces entiers ?}
+
+\begin{verbatim}
+Pour  AC ED 00 05 77 08 00 00 00 11 00 00 00 02
+
+STREAM_MAGIC =  AC ED
+STREAM_VERSION = 00 05
+TC_BLOCKDATA = 77
+int = 00 00 00 11 = 17
+int = 00 00 00 02 = 2
+\end{verbatim}
+
+\subsection{Décoder la séquence d’octets suivante sachant qu’une chaîne de caractères a été écrite dans le flux.}
+
+\begin{verbatim}
+Pour AC ED 00 05 77 07 00 05 48 65 6C 6C 6F
+
+STREAM_MAGIC  = AC ED
+STREAM_VERSION = 00 05
+TC_BLOCKDATA = 77
+7 octet pour la string = 07
+2 octet pour la taille = 00 05
+STRING = 48 65 6C 6C 6F  =  "hello"
+\end{verbatim}
+
+\subsection{Quels en sont les avantages et les inconvénients ?}
+
+
+\subsection{Coder un objet de la classe Point2D suivante ayant pour valeur de x 18 et pour valeur de y 20}
+
 \begin{verbatimtab}
 class Point2D implements Serializable { 
-	private long x;	private long y; 
+	private long x;
+	private long y; 
 }
 \end{verbatimtab}
 
-%\begin{tabular}{|c|c|c|c|}
-%\hline
-%0xACED & \multicolumn{3}{|c|}{Magic Stream} \\
-%0x0005 & \multicolumn{3}{|c|}{Stream version}\\
-%TC\_CLASS & \multicolumn{3}{|c|}{}\\
-%\hline
-%\multirow{3}{2cm}{classDesc} &newClassDesc&& \\
-%&nullReference & &\\
-%&(ClassDesc)prevObject & &\\
-%\hline
-%handle & \multicolumn{3}{|c|}{0}\\
-%\end{tabular}
-\cf Francois
-
+\begin{verbatimtab}
+ACED				magic
+0005		 		streamVersion
+73				TC_OBJECT
+72				TC_CLASSDESC
+0007				taille string
+50 6F 69 6E 74 32		"Point2D"
+00 00 00 00 00 00 00		SUID
+00 00 00 00 00 00 00		new handle
+02 00 00 00 00 00 00		classDescFlag (serializable)
+00 02 00 00 00 00 00		count 2 champ
+4A				long
+0001				taille string
+78				x
+4A				long
+0001				taille string
+79				y
+78				TC_END_BLOCK_DATA
+70				TC_NULL
+01				new Handle (1)
+00 00 00 00 00 00 00 12	18 	val du premier champ
+00 00 00 00 00 00 00 14	20 	val du deuxième champ
+\end{verbatimtab}
 \signature
 
 \end{document}

@@ -1,0 +1,85 @@
+ \documentclass[a4paper,10pt]{article}
+\input{/Users/WannaGetHigh/workspace/latex/macros.tex}
+
+\title{TD 5/TD 6 Ð RMI}
+\author{Franois \bsc{Lepan}}
+
+\begin{document}
+\maketitle
+
+\section{}
+
+\section{Election sur un anneau d'objets RMI}
+\subsection{Quel est le test d'arrt de l'Žlection i.e. du  "tour de l'anneau" ? }
+
+\subsection{Quelle information faut-il inclure dans le message qui fait le "tour de l'anneau" pour pouvoir rŽaliser ce test ?}
+
+\subsection{ReprŽsenter sur un diagramme les Žchanges de messages engendrŽs par lÕexŽcution dÕune Žlection avec lÕobjet 2 comme initiateur}
+
+\subsection{Quel est le test de dŽcision de l'Žlu ?}
+
+\subsection{Quelle information faut-il inclure dans le message qui fait le " tour de l'anneau" pour pouvoir rŽaliser ce test ?}
+
+\subsection{Ë la fin d'un tour, quel(s) objet(s) conna”(ssen)t l'identifiant de l'Žlu ? Pourquoi ?}
+
+\subsection{Pour chacune des solutions proposŽes ˆ la question prŽcŽdente, dŽfinir l'interface de la classe Java correspondant ˆ un objet de l'anneau}
+
+\begin{verbatimtab}
+public interface NoeudElection extends Remote {
+	//  Bleu 
+	// On ajoute l'initiateur si il y a plusieurs vague lancer en mm temps 
+	// afin de ne pas avoir de concurrence entre les vagues
+	// appelant -> pour savoir de quel cote propager
+	public void electionChef(NoeudElection appelant, NoeudElection chef) throws RemoteException;
+	
+	// Rouge
+	public void propagationChef(NoeudElection appelant, NoeudElection chef) throws RemoteException;
+	
+	// en passant la valeur de puissance dans la 1ere fonction on peut enlever cette fction -> optimisation
+	int getPuissance();
+}
+\end{verbatimtab}
+
+\subsection{Pour chacune des solutions proposŽes ˆ la question prŽcŽdente, donner en Java l'implanta- tion de la mŽthode election}
+
+\begin{verbatimtab}
+
+publci Noeud implements NoeudElection {
+
+	// cette valeur est supposŽe initialisŽ par un joli Math.random()
+	private int myVal
+	
+	private NoeudElection chef;
+	private NoeudElection gauche;
+	private NoeudElection droite;
+	
+	public void electionChef(NoeudElection appelant, NoeudElection chef, int chefVal) throws RemoteException {
+		
+		// Bleu
+		if (chef == null) {
+			if (this.myVal > chefVal) {
+				this.chef = this;
+			} else {
+				this.chef = chef;
+				this.myVal = chefVal;
+			}
+			
+			if (this.gauche == appelant) {
+				this.droite.election(this,this.chef,this.myVal)
+			} else {
+				this.gauche.election(this,this.chef,this.myVal)			
+			}
+		// Rouge	
+		} else {
+			if (this.myVal < chefVal) {
+				this.myVal = chefVal;
+				this.chef = chef;
+			}
+			
+			appelant.propagationChef(this,this.chef);
+		}
+	}
+}
+\end{verbatimtab}
+
+\end{document}
