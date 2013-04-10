@@ -1,0 +1,98 @@
+ \documentclass[a4paper,10pt]{article}
+\input{/Users/WannaGetHigh/workspace/latex/macros.tex}
+
+\title{TD: 7 - 8 RMI}
+\author{Franois \bsc{Lepan}}
+
+\begin{document}
+\maketitle
+
+\section{Annuaire}
+
+\section{Instanciation ˆ la demande}
+
+\subsection{Ecrire le code Java de la classe \emph{ClientPingThread}}
+
+\begin{verbatimtab}
+
+public interface CalculIrf extends Remote {
+	public Serialisable submit(String arg) throws RemoteException;
+	public String getHost() throws RemoteException;
+	public int getPort() throws RemoteException;
+}
+
+public class ClientPingThread exends Thread {
+	
+	Socket s;
+	DataInputStream is;
+	DataOutPutStream os;
+	public static final int TEN_SECONDS = 10 000;
+	
+	public ClientPingThread(CalculIrf computer) {
+		this.s = new Socket(computer.getHost(),computer.getPort());
+		this.os = new DataInputStream(s.getOutPutStream());
+		this.is = new DataOutputStream(s.getInputStream());
+		this.s.setTimeout(TEN_SECONDS);
+	}
+	
+	public void run() throws RMIException {
+		int nbEssais = 3;
+		while(nbEssais-- > 0) {
+			if (ping()) nbEssais = 3;
+		}
+		throw new RMIException();
+	}
+	
+	public boolean ping() throws RMIException {
+		this.s.send("PING");
+		
+		try {
+			os.writeUTF("PING");
+			return "ACK".equals(is.readUTF());
+			
+		} catch(IOTimeout) {
+			return false
+		}
+	}
+}
+
+public MAIN {
+	calculIrf
+}
+\end{verbatimtab}
+
+\subsection{Est-il nŽcessaire que les objets serveurs RMI crŽŽs par le serveur Web soient enregistrŽs dans le service de noms de RMI (rmiregistry) ?}
+
+pas besoin de l'enregistrer car on a CAlculeIrF qui permet de savoir a quel objet on communique.
+
+
+\subsection{Si lÕon veut que le serveur Web puisse retourner la mme rŽfŽrence dÕobjets RMI ˆ deux clients sÕexŽcutant simultanŽment, de quoi faut-il sÕassurer ?}
+
+Qu'il soit Thread safe -> synchronize
+
+\subsection{DŽcrire en franais lÕalgorithme de fonctionnement du serveur Web}
+
+On nous demande un objet 
+	-> si crŽer -> on vŽrifie si Threa safe -> on le renvoi.
+	-> si l'objet n'est pas crŽer -> on en crŽer un qui est ThreadSafe -> on le renvoi
+
+\section{Patron Observateur/Sujet}
+
+\subsection{ƒcrire l'interface Java RMI des deux objets Observer et Subject.}
+\begin{verbatimtab}
+	public interface RMIObserver extends Remote {
+		void notify() throws RemoteException;
+	}
+	
+	public interface RMIObservable extends Remote {
+		void addObserver(RMIObserver) {
+		
+		}
+	}
+\end{verbatimtab}
+
+\end{document}
+
+
+
+
