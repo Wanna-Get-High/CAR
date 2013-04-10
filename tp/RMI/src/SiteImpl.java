@@ -12,6 +12,17 @@ import java.util.List;
  * I am the implementation of the remote interface.
  * I am both the RMI server and client.
  * 
+ * Code snippets:
+ * 
+ * 	- instance creation:
+ * 		SiteImpl("//localhost/root", null); //create a root node
+ * 		SiteImpl("//localhost/son", "//localhost/root"); //create a son node. Its father is "//localhost/root/"
+ * 	- main messages:
+ * 		node.sendMessage("Hello World");
+ * 		node.addFather("//localhost/root");
+ * 		node.addSon(node1);
+ * 
+ * 
  * @author Benjamin Van Ryseghem, François Lepan
  *
  */
@@ -35,10 +46,17 @@ public class SiteImpl extends UnicastRemoteObject implements SiteItf {
 	/** The id used for binding */
 	private String id;
 	
-	
+	/**
+	 * List of the current instance children 
+	 */
 	private List<SiteItf> children;
 
-	
+	/**
+	 * Main constructor
+	 * @param id the identifier used to create the binding
+	 * @param father the binding name of the father node
+	 * @throws RemoteException
+	 */
 	public SiteImpl(String id, String father) throws RemoteException {
 		super();
 		
@@ -50,6 +68,15 @@ public class SiteImpl extends UnicastRemoteObject implements SiteItf {
 		this.loop();
 	}
 	
+	/**
+	 * Infinite loop. Reading from the stdin, and propagating the messages through the children.
+	 * This method handle commands:
+	 * 	- addFather: adds a father to the current node
+	 *  - childrenSize: displays the number of children
+	 *  - fathersSize:  displays the number of fathers
+	 *  - exit: exits
+	 * @throws RemoteException
+	 */
 	protected void loop() throws RemoteException{
 		while(true){
 			String message;
@@ -57,8 +84,6 @@ public class SiteImpl extends UnicastRemoteObject implements SiteItf {
 	        message = console.readLine("Please enter a message or a command\n" +
 	        		"\t[addFather host | childrenSize | fathersSize | exit] :\n");
 	        if("exit".equals(message))  						exit();
-	        else if("-h".equals(message))						System.out.println(SiteImpl.stringUsage());
-	        else if("--help".equals(message))					System.out.println(SiteImpl.stringUsage());
 	        else if(message.startsWith(FATHER_STRING))			addFather(message);
 	        else if(message.startsWith(FATHERS_SIZE_STRING))	printFathersSize();
 	        else if(message.startsWith(CHILDREN_SIZE_STRING))	printChildrenSize();
@@ -66,15 +91,25 @@ public class SiteImpl extends UnicastRemoteObject implements SiteItf {
 		}
 	}
 
-	
+	/**
+	 * Print the number of fathers
+	 */
 	protected void printFathersSize(){
 		System.out.println("Number of fathers: "+this.fathers.size());
 	}
 	
+	/**
+	 * Print the number of children.
+	 */
 	protected void printChildrenSize(){
 		System.out.println("Number of children: "+this.children.size());
 	}
 	
+	/**
+	 * Add a father to the node from a command
+	 * @param message message is the full command
+	 * @throws RemoteException
+	 */
 	protected void addFather(String message) throws RemoteException{
 		
 		String father = message.substring(FATHER_STRING.length()+1);
@@ -91,6 +126,10 @@ public class SiteImpl extends UnicastRemoteObject implements SiteItf {
 		System.out.println("Father "+father+ " added");
 	}
 	
+	/**
+	 * Exists. First the method add all the fathers of the node to its children. Second remove the current node from its son's fathers list. Third remove the current node to its fathers. Fourth and last, destroy the current node binding.
+	 * @throws RemoteException
+	 */
 	protected void exit() throws RemoteException {
 			
 		for(SiteItf son : this.children){
@@ -117,6 +156,12 @@ public class SiteImpl extends UnicastRemoteObject implements SiteItf {
 		System.exit(0);
 	}
 	
+	/**
+	 * Register the freshly created node to its father, and to the registry.
+	 * @param id current node binding
+	 * @param father father node binding
+	 * @throws RemoteException
+	 */
 	protected void register(String id, String father) throws RemoteException {
 		System.setSecurityManager(null);
 		try{
@@ -142,7 +187,11 @@ public class SiteImpl extends UnicastRemoteObject implements SiteItf {
 		}
 	}
 	
-	
+	/**
+	 * Send a message. This method is used to send the first message of the whole propagation wave.
+	 * @param message the message to propagate
+	 * @throws RemoteException
+	 */
 	public void sendMessage(String message) throws RemoteException {
 		
 		System.out.println("id: "+this.id+" mess: "+message);
@@ -175,38 +224,6 @@ public class SiteImpl extends UnicastRemoteObject implements SiteItf {
 		this.children.add(son);
 	}
 	
-	public static String stringUsage(){
-		return "SiteImpl id [father]\n" +
-				"\tid:\turl of the current node (including the hostname).\n" +
-				"\t\tEx: \"//localhost/example\"\n" +
-				"\tfather:\turl of my father node (including the hostname). If this node does not have a father, do not provide this argument.\n" +
-				"\t\tEx: \"//fatherhost/father\"";
-	}
-	
-	public static void main(String[] args) {
-		if(args.length < 1 || args.length > 2) {
-			System.out.println("Invalid number of arguments. "+args.length+ " arguments provided when only 1 or 2 are expected");
-			System.out.println(SiteImpl.stringUsage());
-			System.exit(1);
-		}
-		
-		if ( args.length == 1)
-			try {
-				new SiteImpl(args[0], null);
-			} catch (RemoteException e) {
-				System.out.println("Remote exception thrown");
-				e.printStackTrace();
-			}
-		else
-			try {
-				new SiteImpl(args[0], args[1]);
-			} catch (RemoteException e) {
-				System.out.println("Remote exception thrown");
-				e.printStackTrace();
-			}
-		
-	}
-
 	@Override
 	public void addFather(SiteItf father) throws RemoteException {
 		if(father == null) return;
@@ -239,4 +256,51 @@ public class SiteImpl extends UnicastRemoteObject implements SiteItf {
 		return this.hashCode() == other.hashCode();
 	}
 
+	
+	
+	/**
+	 * Create a string about how to use this class
+	 * @return the string about how to use the class SiteImpl
+	 */
+	public static String stringUsage(){
+		return "SiteImpl id [father]\n" +
+				"\tid:\turl of the current node (including the hostname).\n" +
+				"\t\tEx: \"//localhost/example\"\n" +
+				"\tfather:\turl of my father node (including the hostname). If this node does not have a father, do not provide this argument.\n" +
+				"\t\tEx: \"//fatherhost/father\"";
+	}
+	
+	
+	
+	
+	public static void main(String[] args) {
+		if(args.length < 1 || args.length > 2) {
+			System.out.println("Invalid number of arguments. "+args.length+ " arguments provided when only 1 or 2 are expected");
+			System.out.println(SiteImpl.stringUsage());
+			System.exit(1);
+		}
+		
+		if ( args.length == 1){
+			if("-h".equals(args[0]) || "--help".equals(args[0])){
+				System.out.println(SiteImpl.stringUsage());
+				System.exit(0);
+			}
+			
+			try {
+				new SiteImpl(args[0], null);
+			} catch (RemoteException e) {
+				System.out.println("Remote exception thrown");
+				e.printStackTrace();
+			}
+		}
+		else {
+			try {
+				new SiteImpl(args[0], args[1]);
+			} catch (RemoteException e) {
+				System.out.println("Remote exception thrown");
+				e.printStackTrace();
+			}
+		}
+	}
+	
 }
