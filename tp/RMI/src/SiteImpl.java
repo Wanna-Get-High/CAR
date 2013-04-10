@@ -76,8 +76,7 @@ public class SiteImpl extends UnicastRemoteObject implements SiteItf {
 			return;
 		}
 		try{
-			this.father = (SiteItf)( Naming.lookup(father));
-			this.father.addSon(this);
+			this.setFather((SiteItf)( Naming.lookup(father) ));
 		}
 		catch(NotBoundException ex){
 			System.out.println("This father is not in the registry table");
@@ -138,6 +137,7 @@ public class SiteImpl extends UnicastRemoteObject implements SiteItf {
 	@Override
 	public void setFather(SiteItf father) throws RemoteException {
 		this.father = father;
+		father.addSon(this);
 	}
 
 	@Override
