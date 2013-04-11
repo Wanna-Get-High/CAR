@@ -31,14 +31,14 @@ public interface SiteItf extends Remote {
 	public void addSon(SiteItf son) throws RemoteException;
 	
 	/**
-	 * Remove a son from the children list
+	 * Remove a son from the children list. Does not add the father
 	 * @param son a node
 	 * @throws RemoteException
 	 */
 	public void removeSon(SiteItf son) throws RemoteException;
 	
 	/**
-	 * Add a father to the fathers list
+	 * Add a father to the fathers list. Contrary to addSon, this method have the responsibility to add the son also
 	 * @param father a node
 	 * @throws RemoteException
 	 */

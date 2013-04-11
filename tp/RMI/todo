@@ -1,0 +1,5 @@
+concurrent tranfer -> send messages in different threads
+sendMessage -> pas d'array list use a HashSet
+shell script
+push to interface sendMessage(String message)
+readme -> Code Samples
